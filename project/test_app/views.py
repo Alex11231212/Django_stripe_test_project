@@ -18,8 +18,8 @@ class GetItemPageView(generic.View):
         return render(
             request,
             'test_app/index.html',
-            {'item': item, 'api_key': public_key},
-        )
+            {'item': item, 'api_key': public_key,
+             'price': item.price / 100})
 
 
 class CreateCheckoutSession(generic.View):
