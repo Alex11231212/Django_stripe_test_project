@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <form id="payment-form" data-secret="{{ client_secret }}">
+    <div id="payment-element">
+      <!-- Elements will create form elements here -->
+    </div>
+
+    <button id="submit">Submit</button>
+    <div id="error-message">
+      <!-- Display error message to your customers here -->
+    </div>
+  </form>
+
+  <script type="text/javascript">
+  var form = document.getElementById("payment-form");
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+      // Complete payment when the submit button is clicked
+      fetch("{% url 'create-payment-intent' product.id %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+          email: document.getElementById('email').value
+        })
+      })
+        .then(function(result) {
+          return result.json();
+        })
+        .then(function(data) {
+          payWithCard(stripe, card, data.clientSecret);
+        });
+  </script>
+</body>
+</html>

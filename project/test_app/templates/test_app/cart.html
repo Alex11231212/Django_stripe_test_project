@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+  <head>
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+  {% csrf_token %}
+    <h1>Your cart contains:</h1>
+    {% for item in items %}
+      <p>{{ item.name }} - {{ item.price }} {{ currency }}</p>
+    {% endfor %}
+    <br>
+      <p>Net price: {{ order.get_net_price }} {{ currency }}</p>
+      <p>Your discount is: {{ order.discount }}% -
+        {{ order.get_discounted_price }} {{ currency }}</p>
+      <p>Total price (include {{ order.tax }}% tax) is: {{ order.get_total_price }} {{ currency }}</p>
+    <button id="buy-button">Go to checkout</button>
+
+    <script type="text/javascript">
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      var stripe = Stripe("{{ api_key }}");
+      var buyButton = document.getElementById('buy-button');
+      buyButton.addEventListener('click', function() {
+      fetch("{% url 'create-payment-intent' order.id %}",
+          {
+              method: 'POST',
+              headers: {'X-CSRFToken': csrftoken},
+          }
+          )
+      }
+      )
+    </script>
+  </body>
+</html>
