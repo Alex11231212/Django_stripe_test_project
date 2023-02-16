@@ -27,7 +27,7 @@ services:
     build: .
     depends_on:
       - db
-    command: sh -c "cd project
+    command: sh -c "
       python manage.py collectstatic --noinput &&
       python manage.py makemigrations &&
       python manage.py migrate &&
@@ -35,7 +35,7 @@ services:
       User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell &&
       gunicorn --bind 0.0.0.0:8000 test_project.wsgi:application"
     volumes:
-      - ./:/test_project
+      - ./project:/test_project
     expose:
       - 8000
 

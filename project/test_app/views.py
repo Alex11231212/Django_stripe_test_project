@@ -9,7 +9,7 @@ from test_app.models import Item
 
 stripe.api_key = settings.PRIVATE_STRIPE_API_KEY
 public_key = settings.PUBLIC_STRIPE_API_KEY
-YOUR_DOMAIN = 'http://localhost:80'
+YOUR_DOMAIN = settings.YOUR_DOMAIN
 
 
 class GetItemPageView(generic.View):
