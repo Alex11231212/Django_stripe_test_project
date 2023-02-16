@@ -1,0 +1,54 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:13.4-alpine
+    hostname: postgres_db_container
+    environment:
+      POSTGRES_DB: "test_db"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "Passwd123"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ../2. Init Database:/docker-entrypoint-initdb.d
+      - ./pgdata:/var/lib/postgresql/data
+    command: ["postgres", "-c", "log_statement=all",
+              "-c", "logging_collector=on",
+              "-c", "log_filename=postgresql.log"]
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build: .
+    depends_on:
+      - db
+    command: sh -c "cd project
+      python manage.py collectstatic --noinput &&
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      echo \"from django.contrib.auth.models import User;
+      User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell &&
+      gunicorn --bind 0.0.0.0:8000 test_project.wsgi:application"
+    volumes:
+      - ./:/test_project
+    expose:
+      - 8000
+
+
+  nginx:
+    image: nginx:1.23.2-alpine
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - ./project/static:/var/www/html/static
+      - ./nginx_conf.d:/etc/nginx/conf.d
+volumes:
+  pg_data:
+  static_data:
